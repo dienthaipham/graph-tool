@@ -2,13 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import ActionModal from './components/ActionsModal';
 import AddNodeForm from './components/AddNodeForm';
 import AddWeightForm from './components/AddWeightForm';
+import ConfirmDelete from './components/ConfirmDelete';
 import DetailTooltip from './components/DetailTooltip';
 import UpdateForm from './components/UpdateForm';
+import UpdateLinesForm from './components/UpdateLinesForm';
 import { MODES, NODE_RADIUS, SCALE_MULTIPLIER } from './constants';
 import { drawFunc } from './draw';
 import { Line, Node } from './objects';
 import './style.css';
 import {
+    checkEdgeMerged,
     checkExistEdge,
     checkExistLink,
     compareTwoGraphHistory,
@@ -16,6 +19,7 @@ import {
     getIndexOfLine,
     getIndexOfNode,
     getLineByClick,
+    getLineById,
     getLineCoordinate,
     getNodeByClick,
     getNodeById,
@@ -48,6 +52,8 @@ function GraphTool(props) {
 
     const [hoverNode, setHoverNode] = useState(null);
     const [hoverPosition, setHoverPosition] = useState({ top: '0', left: '0' });
+
+    const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
 
     const handleSwitchMode = (o) => {
         setSelectedNode(null);
@@ -182,10 +188,38 @@ function GraphTool(props) {
         });
     };
 
+    const handleDeleteMergedEdge = (checkedValues) => {
+        console.log('Handle delete merged edge');
+        const line1 = actionData.line;
+        const line2 = getLineById(lineList, line1.id2, line1.id1);
+
+        if (checkedValues[0] && checkedValues[1]) {
+            console.log('>>>>>>>>>>>>>>>>>>>>>>>>>');
+            let newLineList = [...lineList];
+            newLineList = newLineList.filter(
+                (l) => ![actionData.line.id1, actionData.line.id2].includes(l.id1),
+            );
+
+            setLineList(newLineList);
+            graphHistoryRef.current.push({
+                nodeList,
+                lineList: newLineList,
+            });
+        } else {
+            if (checkedValues[0]) removeLine(line1);
+            if (checkedValues[1]) removeLine(line2);
+        }
+    };
+
     const handleChooseAction = (v) => {
         if (v === 'REMOVE') {
             removeNode(actionData.node);
-            removeLine(actionData.line);
+            if (actionData.line && checkEdgeMerged(lineList, actionData.line)) {
+                setOpenDeleteConfirm(true);
+            } else {
+                removeLine(actionData.line);
+            }
+
             return;
         }
         setAction(v);
@@ -211,22 +245,12 @@ function GraphTool(props) {
             if (!updateLine.multiple && !checkExistLink(lineList, updateLine.id1, updateLine.id2)) {
                 newLineList[idx1] = { ...lineList[idx1], properties: { w: value } };
                 setLineList(newLineList);
-            } else if (
-                !updateLine.multiple &&
-                checkExistLink(lineList, updateLine.id1, updateLine.id2)
-            ) {
-                console.log(updateLine.properties.w);
-                console.log(lineList[idx1].properties.w);
-
-                if (value !== updateLine.properties.w) {
-                    newLineList[idx1] = {
-                        ...newLineList[idx1],
-                        multiple: true,
-                        properties: { w: value },
-                    };
-                    newLineList[idx2] = { ...newLineList[idx2], multiple: true };
-                    setLineList(newLineList);
-                }
+            } else if (checkEdgeMerged(lineList, updateLine)) {
+                // case: merged line
+                const multiple = Array.isArray(value) && value[0] !== value[1];
+                newLineList[idx1] = { ...newLineList[idx1], multiple, properties: { w: value[0] } };
+                newLineList[idx2] = { ...newLineList[idx2], multiple, properties: { w: value[1] } };
+                setLineList(newLineList);
             } else if (updateLine.multiple) {
                 newLineList[idx1] = {
                     ...newLineList[idx1],
@@ -416,7 +440,12 @@ function GraphTool(props) {
                         const targetLine = getLineByClick(lineList, clickX0, clickY0);
 
                         removeNode(targetNode);
-                        removeLine(targetLine);
+                        if (targetLine && checkEdgeMerged(lineList, targetLine)) {
+                            setOpenDeleteConfirm(true);
+                            setActionData({ node: null, line: targetLine });
+                        } else {
+                            removeLine(targetLine);
+                        }
                     }
 
                     break;
@@ -487,6 +516,32 @@ function GraphTool(props) {
         return () => window.removeEventListener('resize', handleResizeScreen);
     }, [actionModalOpen]);
 
+    const renderUpdateForm = () => {
+        const handleClose = () => (setAction(null), setActionData({ node: null, line: null }));
+
+        if (action === 'UPDATE') {
+            if (actionData.line && checkEdgeMerged(lineList, actionData.line)) {
+                return (
+                    <UpdateLinesForm
+                        onClose={() => handleClose()}
+                        actionData={actionData}
+                        onUpdate={handleUpdate}
+                        nodeList={nodeList}
+                        lineList={lineList}
+                    />
+                );
+            }
+
+            return (
+                <UpdateForm
+                    onClose={() => handleClose()}
+                    actionData={actionData}
+                    onUpdate={handleUpdate}
+                />
+            );
+        }
+    };
+
     return (
         <>
             {hoverNode && <DetailTooltip node={hoverNode} position={hoverPosition} />}
@@ -512,13 +567,19 @@ function GraphTool(props) {
                 />
             )}
 
-            {action === 'UPDATE' && (
-                <UpdateForm
-                    onClose={() => (setAction(null), setActionData({ node: null, line: null }))}
+            {openDeleteConfirm && (
+                <ConfirmDelete
                     actionData={actionData}
-                    onUpdate={handleUpdate}
+                    nodeList={nodeList}
+                    lineList={lineList}
+                    onClose={() => (
+                        setOpenDeleteConfirm(false), setActionData({ node: null, line: null })
+                    )}
+                    onDelete={handleDeleteMergedEdge}
                 />
             )}
+
+            {renderUpdateForm()}
 
             <ul className='mode-tabs'>
                 {MODES.map((o) => (

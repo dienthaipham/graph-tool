@@ -139,12 +139,22 @@ export function getLineCoordinate(x1, y1, x2, y2, r) {
     };
 }
 
+// ******************* End of utils for math computation *****************
+
 export function getNodeById(nodeList, id) {
     return nodeList.filter((node) => node.id === id)[0];
 }
 
+export function getLineById(lineList, id1, id2) {
+    return lineList.filter((line) => line.id1 === id1 && line.id2 === id2)[0];
+}
+
 export function checkExistEdge(lineList, id1, id2) {
     return lineList.some((line) => line.id1 === id1 && line.id2 === id2);
+}
+
+export function checkEdgeMerged(lineList, line) {
+    return !line.multiple && checkExistLink(lineList, line.id1, line.id2);
 }
 
 export function checkExistLink(lineList, id1, id2) {
