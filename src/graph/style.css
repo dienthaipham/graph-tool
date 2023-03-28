@@ -1,0 +1,40 @@
+.mode-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    list-style: none;
+}
+
+.tab {
+    cursor: pointer;
+    user-select: none; /* supported by Chrome and Opera */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+.selected {
+    text-decoration: underline;
+}
+
+#wrapper {
+    /* position: relative; */
+    border: 1px solid #9c9898;
+    width: 720px;
+    height: 720px;
+    margin: 0 auto;
+}
+
+#buttonWrapper {
+    position: absolute;
+    width: 30px;
+    top: 2px;
+    right: 40px;
+}
+
+input[type='button'] {
+    padding: 5px;
+    width: 60px;
+    margin: 0px 0px 2px 0px;
+}
