@@ -1,5 +1,5 @@
 const MODES = [
-    { value: 'DEFAULT', label: 'Move node' },
+    { value: 'DEFAULT', label: 'Selection' },
     { value: 'ADD_NODE', label: 'Add node' },
     { value: 'ADD_EDGE', label: 'Add edge' },
     { value: 'REMOVE_OBJECT', label: 'Remove object' },

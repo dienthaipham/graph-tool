@@ -6,7 +6,7 @@ function DetailTooltip(props) {
         <div className='detail-tooltip' style={position}>
             <div>Details</div>
             <hr></hr>
-            <div>{node.properties.name}</div>
+            <div>Name: {node.properties.name}</div>
         </div>
     );
 }

@@ -7,11 +7,16 @@
 
 .tab {
     cursor: pointer;
-    user-select: none; /* supported by Chrome and Opera */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none;
+    /* supported by Chrome and Opera */
+    -webkit-user-select: none;
+    /* Safari */
+    -khtml-user-select: none;
+    /* Konqueror HTML */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* Internet Explorer/Edge */
 }
 
 .selected {
@@ -29,8 +34,8 @@
 #buttonWrapper {
     position: absolute;
     width: 30px;
-    top: 2px;
-    right: 40px;
+    top: 54px;
+    right: 597px;
 }
 
 input[type='button'] {

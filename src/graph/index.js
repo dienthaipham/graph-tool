@@ -20,6 +20,7 @@ import {
     getNodeByClick,
     getNodeById,
     randomNodeId,
+    unLinkTwoNodes,
 } from './utils';
 
 function GraphTool(props) {
@@ -112,8 +113,37 @@ function GraphTool(props) {
         });
     };
 
-    const handleAddEdge = (w) => {
+    // add two edges with same weight
+    const addMergedLine = (node1, node2, w) => {
+        const lineCoordinate1 = getLineCoordinate(node1.x, node1.y, node2.x, node2.y, NODE_RADIUS);
+        const lineCoordinate2 = getLineCoordinate(node2.x, node2.y, node1.x, node1.y, NODE_RADIUS);
+        let newLineList = [...lineList];
+        newLineList = unLinkTwoNodes(newLineList, node1, node2);
+
+        newLineList = [
+            ...newLineList,
+            new Line(node1.id, node2.id, false, ...Object.values(lineCoordinate1), {
+                w,
+            }),
+            new Line(node2.id, node1.id, false, ...Object.values(lineCoordinate2), {
+                w,
+            }),
+        ];
+        setLineList(newLineList);
+        graphHistoryRef.current.push({
+            nodeList,
+            lineList: newLineList,
+        });
+    };
+
+    const handleAddEdge = (w, multipleDirect) => {
         const { selectedNode, targetNode } = formMetaData.addWeight;
+
+        if (multipleDirect) {
+            addMergedLine(selectedNode, targetNode, w);
+            setSelectedNode(null);
+            return;
+        }
 
         const lineCoordinate = getLineCoordinate(
             selectedNode.x,
@@ -173,7 +203,11 @@ function GraphTool(props) {
             const idx = getIndexOfLine(newLineList, line.id2, line.id1);
             newLineList[idx] = { ...lineList[idx], multiple: false };
         }
-        newLineList = newLineList.filter((l) => !(l.id1 === line.id1 && l.id2 === line.id2));
+        newLineList = newLineList.filter(
+            (l) =>
+                !(l.id1 === line.id1 && l.id2 === line.id2) &&
+                !(l.id1 === line.id2 && l.id2 === line.id1),
+        );
 
         setLineList(newLineList);
         graphHistoryRef.current.push({
@@ -203,43 +237,47 @@ function GraphTool(props) {
                 lineList,
             });
         } else if (actionData.line) {
-            const updateLine = actionData.line;
-            let newLineList = [...lineList];
-            const idx1 = getIndexOfLine(lineList, updateLine.id1, updateLine.id2);
-            const idx2 = getIndexOfLine(lineList, updateLine.id2, updateLine.id1);
+            console.log({ value });
+            const { direction, weight } = value;
+            const line = actionData.line;
 
-            if (!updateLine.multiple && !checkExistLink(lineList, updateLine.id1, updateLine.id2)) {
-                newLineList[idx1] = { ...lineList[idx1], properties: { w: value } };
-                setLineList(newLineList);
-            } else if (
-                !updateLine.multiple &&
-                checkExistLink(lineList, updateLine.id1, updateLine.id2)
-            ) {
-                console.log(updateLine.properties.w);
-                console.log(lineList[idx1].properties.w);
+            const node1 = getNodeById(nodeList, line.id1);
+            const node2 = getNodeById(nodeList, line.id2);
 
-                if (value !== updateLine.properties.w) {
-                    newLineList[idx1] = {
-                        ...newLineList[idx1],
-                        multiple: true,
-                        properties: { w: value },
-                    };
-                    newLineList[idx2] = { ...newLineList[idx2], multiple: true };
-                    setLineList(newLineList);
-                }
-            } else if (updateLine.multiple) {
-                newLineList[idx1] = {
-                    ...newLineList[idx1],
-                    multiple: value !== lineList[idx2].properties.w,
-                    properties: { w: value },
-                };
-                newLineList[idx2] = {
-                    ...newLineList[idx2],
-                    multiple: value !== lineList[idx2].properties.w,
-                };
-                setLineList(newLineList);
+            if (direction[0] && direction[1]) {
+                addMergedLine(node1, node2, weight);
+                return;
             }
 
+            let NODE1;
+            let NODE2;
+            if (direction[0]) {
+                NODE1 = node1;
+                NODE2 = node2;
+            } else if (direction[1]) {
+                NODE1 = node2;
+                NODE2 = node1;
+            }
+
+            const lineCoordinate = getLineCoordinate(
+                NODE1.x,
+                NODE1.y,
+                NODE2.x,
+                NODE2.y,
+                NODE_RADIUS,
+            );
+
+            let newLineList = [...lineList];
+            newLineList = unLinkTwoNodes(newLineList, NODE1, NODE2);
+            let multiple = false;
+
+            newLineList = [
+                ...newLineList,
+                new Line(NODE1.id, NODE2.id, multiple, ...Object.values(lineCoordinate), {
+                    w: weight,
+                }),
+            ];
+            setLineList(newLineList);
             graphHistoryRef.current.push({
                 nodeList,
                 lineList: newLineList,
@@ -392,7 +430,10 @@ function GraphTool(props) {
                                 if (distanceToCenter < selectedNode.radius) return;
 
                                 // CHeck same link -> return
-                                if (checkExistEdge(lineList, selectedNode.id, targetNode.id))
+                                if (
+                                    checkExistLink(lineList, selectedNode.id, targetNode.id) ||
+                                    checkExistEdge(lineList, selectedNode.id, targetNode.id)
+                                )
                                     return;
 
                                 setFormOpen({ ...formOpen, addWeight: true });
@@ -516,6 +557,8 @@ function GraphTool(props) {
                 <UpdateForm
                     onClose={() => (setAction(null), setActionData({ node: null, line: null }))}
                     actionData={actionData}
+                    nodeList={nodeList}
+                    lineList={lineList}
                     onUpdate={handleUpdate}
                 />
             )}

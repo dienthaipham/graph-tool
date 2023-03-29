@@ -114,6 +114,10 @@ export function drawLine({ context, lineObject, isSelected }) {
     context.fillStyle = isSelected ? WEIGHT_COLOR_SELECTED : WEIGHT_COLOR;
     context.font = isSelected ? WEIGHT_FONT_SELECTED : WEIGHT_FONT;
     context.fillText(properties.w, xI, yI);
+
+    context.fillStyle = NODE_COLOR;
+    context.fillRect(xI - 5, yI - 15, 20, 20);
+
     context.closePath();
     // ***********************************************
 }

@@ -143,6 +143,10 @@ export function getNodeById(nodeList, id) {
     return nodeList.filter((node) => node.id === id)[0];
 }
 
+export function getLineById(lineList, id1, id2) {
+    return lineList.filter((line) => line.id1 === id1 && line.id2 === id2)[0];
+}
+
 export function checkExistEdge(lineList, id1, id2) {
     return lineList.some((line) => line.id1 === id1 && line.id2 === id2);
 }
@@ -190,4 +194,12 @@ export function getIndexOfNode(nodeList, id) {
     return nodeList.findIndex((node) => {
         return node.id === id;
     });
+}
+
+export function unLinkTwoNodes(lineList, node1, node2) {
+    return lineList.filter(
+        (line) =>
+            !(line.id1 === node1.id && line.id2 === node2.id) &&
+            !(line.id1 === node2.id && line.id2 === node1.id),
+    );
 }
