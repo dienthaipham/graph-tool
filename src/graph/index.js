@@ -118,8 +118,36 @@ function GraphTool(props) {
         });
     };
 
-    const handleAddEdge = (w) => {
+    // add two edges with same weight
+    const addMergedLine = (node1, node2, w) => {
+        const lineCoordinate1 = getLineCoordinate(node1.x, node1.y, node2.x, node2.y, NODE_RADIUS);
+        const lineCoordinate2 = getLineCoordinate(node2.x, node2.y, node1.x, node1.y, NODE_RADIUS);
+        let newLineList = [...lineList];
+
+        newLineList = [
+            ...newLineList,
+            new Line(node1.id, node2.id, false, ...Object.values(lineCoordinate1), {
+                w,
+            }),
+            new Line(node2.id, node1.id, false, ...Object.values(lineCoordinate2), {
+                w,
+            }),
+        ];
+        setLineList(newLineList);
+        graphHistoryRef.current.push({
+            nodeList,
+            lineList: newLineList,
+        });
+    };
+
+    const handleAddEdge = (w, multipleDirect) => {
         const { selectedNode, targetNode } = formMetaData.addWeight;
+
+        if (multipleDirect) {
+            addMergedLine(selectedNode, targetNode, w);
+            setSelectedNode(null);
+            return;
+        }
 
         const lineCoordinate = getLineCoordinate(
             selectedNode.x,
@@ -553,6 +581,8 @@ function GraphTool(props) {
             )}
             {formOpen.addWeight && (
                 <AddWeightForm
+                    addWeightData={formMetaData.addWeight}
+                    lineList={lineList}
                     onClose={() => setFormOpen({ ...formOpen, addWeight: false })}
                     onSubmit={handleAddEdge}
                 />
