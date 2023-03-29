@@ -63,6 +63,11 @@ function GraphTool(props) {
             setLineList(graphHistoryRef.current[countActions - 1]?.lineList || []);
 
             return;
+        } else if (o.value === 'CLEAR') {
+            setNodeList([]);
+            setLineList([]);
+            graphHistoryRef.current = [];
+            return;
         }
         setMode(o);
     };

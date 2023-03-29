@@ -4,6 +4,7 @@ const MODES = [
     { value: 'ADD_EDGE', label: 'Add edge' },
     { value: 'REMOVE_OBJECT', label: 'Remove object' },
     { value: 'UNDO', label: 'Undo' },
+    { value: 'CLEAR', label: 'Clear' },
 ];
 
 // ************** Node style ************************************
