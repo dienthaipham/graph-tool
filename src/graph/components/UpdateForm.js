@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { getLineById, getNodeById } from '../utils';
+import { checkEdgeMerged, getLineById, getNodeById } from '../utils';
 import './styles.css';
 
 const FORM_INFO = {
@@ -30,6 +30,10 @@ function UpdateForm(props) {
 
     const node1 = getNodeById(nodeList, actionData.line?.id1);
     const node2 = getNodeById(nodeList, actionData.line?.id2);
+
+    const [multipleDirect, setMultipleDirect] = useState(
+        checkEdgeMerged(lineList, actionData.line),
+    );
 
     //  ********************************
 
@@ -78,7 +82,7 @@ function UpdateForm(props) {
                                 value={weight}
                                 onChange={(e) => setWeight(e.target.value)}
                             />
-                            <div
+                            {/* <div
                                 style={{
                                     display: 'flex',
                                     alignItems: 'flex-end',
@@ -95,9 +99,9 @@ function UpdateForm(props) {
                                 <label for='vehicle1'>
                                     Edge from {node1.properties.name} to {node2.properties.name}
                                 </label>
-                            </div>
+                            </div> */}
 
-                            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
+                            {/* <div style={{ display: 'flex', alignItems: 'flex-end', gap: '6px' }}>
                                 <input
                                     type='checkbox'
                                     id='vehicle2'
@@ -108,15 +112,29 @@ function UpdateForm(props) {
                                 <label for='vehicle2'>
                                     Edge from {node2.properties.name} to {node1.properties.name}
                                 </label>
+                            </div> */}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'flex-end',
+                                    gap: '6px',
+                                    marginTop: '12px',
+                                }}>
+                                <input
+                                    type='checkbox'
+                                    id='vehicle2'
+                                    name='vehicle2'
+                                    checked={multipleDirect}
+                                    onChange={() => setMultipleDirect(!multipleDirect)}
+                                />
+                                <label for='vehicle2'>Undirected</label>
                             </div>
                         </>
                     )}
                 </div>
 
                 <div className='button-wrapper'>
-                    <button onClick={handleSubmit} disabled={actionData.line && !bool1 && !bool2}>
-                        Save
-                    </button>
+                    <button onClick={handleSubmit}>Save</button>
                 </div>
             </div>
         </div>

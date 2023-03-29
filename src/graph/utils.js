@@ -155,6 +155,12 @@ export function checkExistLink(lineList, id1, id2) {
     return lineList.some((line) => line.id1 === id2 && line.id2 === id1);
 }
 
+export function checkEdgeMerged(lineList, line) {
+    return (
+        checkExistEdge(lineList, line.id1, line.id2) && checkExistEdge(lineList, line.id2, line.id1)
+    );
+}
+
 export function randomNodeId() {
     return Math.round(Math.random() * 10000000000);
 }
