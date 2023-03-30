@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import './styles.css';
 
 function AddWeightForm(props) {
-    const { onClose, onSubmit } = props;
+    const { onClose, onSubmit, addWeightMetaData } = props;
     const [weight, setWeight] = useState('1');
-    const [multipleDirect, setMultipleDirect] = useState(false);
+    const [multipleDirect, setMultipleDirect] = useState(true);
+    const { selectedNode, targetNode } = addWeightMetaData;
 
     return (
         <div>
@@ -17,6 +18,9 @@ function AddWeightForm(props) {
                     </span>
                 </div>
                 <div className='form'>
+                    <div style={{ paddingBottom: '6px' }}>
+                        {`Edge from ${selectedNode.properties.name} to ${targetNode.properties.name}`}
+                    </div>
                     <label>Weight value</label>
                     <input
                         type={'number'}

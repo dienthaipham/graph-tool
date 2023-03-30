@@ -66,7 +66,7 @@ function GraphTool(props) {
         } else if (o.value === 'CLEAR') {
             setNodeList([]);
             setLineList([]);
-            graphHistoryRef.current = [];
+            graphHistoryRef.current.push({ nodeList: [], lineList: [] });
             return;
         }
         setMode(o);
@@ -226,6 +226,10 @@ function GraphTool(props) {
             removeNode(actionData.node);
             removeLine(actionData.line);
             return;
+        } else if (v === 'CREATE_NODE') {
+            setFormOpen({ ...formOpen, addNode: true });
+            setFormMetaData({ ...formMetaData, addNode: actionData.position });
+            return;
         }
         setAction(v);
     };
@@ -310,10 +314,11 @@ function GraphTool(props) {
             setHoverNode(null);
 
             if (dndRef.current.mouseDown) {
-                if (mode.value === 'ADD_NODE') return;
-                if (mode.value === 'DEFAULT' && selectedNode) {
+                // if (mode.value === 'ADD_NODE') return;
+                if (selectedNode) {
                     const keepNodes = nodeList.filter((node) => node.id !== selectedNode.id);
                     setNodeList([...keepNodes, { ...selectedNode, x: clickX0, y: clickY0 }]);
+                    setSelectedNode({ ...selectedNode, x: clickX0, y: clickY0 });
 
                     // **********   Move line **************
                     const updatedLines = [];
@@ -402,6 +407,9 @@ function GraphTool(props) {
             setActionModalOpen(false);
             setActionData({ node: null, line: null });
 
+            const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
+            const targetLine = getLineByClick(lineList, clickX0, clickY0);
+
             switch (evt.which) {
                 case 1:
                     dndRef.current.mouseDown = true;
@@ -420,63 +428,54 @@ function GraphTool(props) {
                         setFormMetaData({ ...formMetaData, addNode: { clickX0, clickY0 } });
 
                         return;
-                    } else if (mode.value === 'ADD_EDGE') {
-                        const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
-                        if (targetNode) {
-                            if (!selectedNode) setSelectedNode(targetNode);
-                            else {
-                                // Check when clicking on the same node
-                                const distanceToCenter = getDistance(
-                                    selectedNode.x,
-                                    selectedNode.y,
-                                    clickX0,
-                                    clickY0,
-                                );
-                                if (distanceToCenter < selectedNode.radius) return;
-
-                                // CHeck same link -> return
-                                if (
-                                    checkExistLink(lineList, selectedNode.id, targetNode.id) ||
-                                    checkExistEdge(lineList, selectedNode.id, targetNode.id)
-                                )
-                                    return;
-
-                                setFormOpen({ ...formOpen, addWeight: true });
-                                setFormMetaData({
-                                    ...formMetaData,
-                                    addWeight: { selectedNode, targetNode },
-                                });
-                                setHoverNode(false);
-                            }
-                        } else setSelectedNode(null);
-                    } else if (mode.value === 'DEFAULT') {
-                        const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
-                        const targetLine = getLineByClick(lineList, clickX0, clickY0);
-
-                        setSelectedNode(targetNode);
-                        setSelectedLine(targetLine);
-                    } else if (mode.value === 'REMOVE_OBJECT') {
-                        setHoverNode(false);
-
-                        const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
-                        const targetLine = getLineByClick(lineList, clickX0, clickY0);
-
-                        removeNode(targetNode);
-                        removeLine(targetLine);
                     }
+
+                    setSelectedLine(targetLine);
+
+                    if (!selectedNode) setSelectedNode(targetNode);
+                    else {
+                        if (targetNode) {
+                            // Check when clicking on the same node
+                            const distanceToCenter = getDistance(
+                                selectedNode.x,
+                                selectedNode.y,
+                                clickX0,
+                                clickY0,
+                            );
+                            if (distanceToCenter < selectedNode.radius) return;
+
+                            // CHeck same link -> return
+                            if (
+                                checkExistLink(lineList, selectedNode.id, targetNode.id) ||
+                                checkExistEdge(lineList, selectedNode.id, targetNode.id)
+                            ) {
+                                setSelectedNode(targetNode);
+                                return;
+                            }
+
+                            setFormOpen({ ...formOpen, addWeight: true });
+                            setFormMetaData({
+                                ...formMetaData,
+                                addWeight: { selectedNode, targetNode },
+                            });
+                            setHoverNode(false);
+                        } else setSelectedNode(null);
+                    }
+
+                    // }
 
                     break;
                 case 3:
-                    const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
-                    const targetLine = getLineByClick(lineList, clickX0, clickY0);
-                    setActionData({ node: targetNode, line: targetLine });
+                    setActionData({
+                        node: targetNode,
+                        line: targetLine,
+                        position: { clickX0, clickY0 },
+                    });
 
-                    if (targetNode || targetLine) {
-                        setActionModalOpen(true);
-                        setActionModalPosition({ top: evt.pageY, left: evt.pageX });
-                        setHoverNode(null);
-                    }
-                    console.log('Right Mouse button pressed.');
+                    setActionModalOpen(true);
+                    setActionModalPosition({ top: evt.pageY, left: evt.pageX });
+                    setHoverNode(null);
+
                     break;
             }
         };
@@ -486,17 +485,14 @@ function GraphTool(props) {
             dndRef.current.mouseDown = false;
             console.log('MOUSE UP :::::::');
 
-            // compare current graph with previous graph in history
-            if (mode.value === 'DEFAULT') {
-                const currentGraph = {
-                    nodeList,
-                    lineList,
-                };
-                const previousHistoryGraph =
-                    graphHistoryRef.current[graphHistoryRef.current.length - 1];
-                if (!compareTwoGraphHistory(currentGraph, previousHistoryGraph)) {
-                    graphHistoryRef.current.push(currentGraph);
-                }
+            const currentGraph = {
+                nodeList,
+                lineList,
+            };
+            const previousHistoryGraph =
+                graphHistoryRef.current[graphHistoryRef.current.length - 1];
+            if (!compareTwoGraphHistory(currentGraph, previousHistoryGraph)) {
+                graphHistoryRef.current.push(currentGraph);
             }
         };
         canvasRef.current.addEventListener('mouseup', handleMouseUp);
@@ -510,12 +506,21 @@ function GraphTool(props) {
         const handleContextMenu = (event) => event.preventDefault();
         document.addEventListener('contextmenu', handleContextMenu);
 
+        const handleWheel = (event) => {
+            // zoom out
+            if (event.deltaY < 0) handleZoom('OUT');
+            // zoom in
+            else if (event.deltaY > 0) handleZoom('IN');
+        };
+        canvasRef.current.addEventListener('wheel', handleWheel);
+
         return () => {
             canvasRef.current.removeEventListener('mousemove', handleMouseMove);
             canvasRef.current.removeEventListener('mousedown', handleMouseDown);
             canvasRef.current.removeEventListener('mouseup', handleMouseUp);
             canvasRef.current.removeEventListener('mouseover', handleMouseOver);
             canvasRef.current.removeEventListener('mouseout', handleMouseOut);
+            canvasRef.current.removeEventListener('wheel', handleWheel);
             document.removeEventListener('contextmenu', handleContextMenu);
         };
     }, [scale, mode, nodeList, selectedNode, lineList, selectedLine, actionModalOpen]);
@@ -544,6 +549,7 @@ function GraphTool(props) {
             )}
             {formOpen.addWeight && (
                 <AddWeightForm
+                    addWeightMetaData={formMetaData.addWeight}
                     onClose={() => setFormOpen({ ...formOpen, addWeight: false })}
                     onSubmit={handleAddEdge}
                 />

@@ -23,9 +23,20 @@ const EDGE_ACTIONS = [
     },
 ];
 
+const CREATE_NODE_ACTIONS = [
+    {
+        value: 'CREATE_NODE',
+        label: 'Create Node',
+    },
+];
+
 function ActionModal(props) {
     const { styles, actionData, onCloseActionModal, onChangeAction } = props;
-    const options = actionData.node ? NODE_ACTIONS : EDGE_ACTIONS;
+    const options = actionData.node
+        ? NODE_ACTIONS
+        : actionData.line
+        ? EDGE_ACTIONS
+        : CREATE_NODE_ACTIONS;
     useEffect(() => {}, []);
 
     const handleChooseAction = (v) => {

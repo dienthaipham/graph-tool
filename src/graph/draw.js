@@ -104,7 +104,7 @@ export function drawLine({ context, lineObject, isSelected }) {
     context.closePath();
 
     // ************** draw arrow ******************
-    canvasArrow(context, x1, y1, x2, y2, ARROW_RADIUS, isSelected);
+    // canvasArrow(context, x1, y1, x2, y2, ARROW_RADIUS, isSelected);
     // ***********************************************
 
     // ************** draw weight ******************
@@ -119,6 +119,13 @@ export function drawLine({ context, lineObject, isSelected }) {
     context.fillRect(xI - 5, yI - 15, 20, 20);
 
     context.closePath();
+    // ***********************************************
+}
+
+function drawDirectionLine({ context, lineObject, isSelected }) {
+    const { x1, y1, x2, y2, properties } = lineObject;
+    // ************** draw arrow ******************
+    canvasArrow(context, x1, y1, x2, y2, ARROW_RADIUS, isSelected);
     // ***********************************************
 }
 
@@ -163,14 +170,14 @@ export function drawArcLine({ context, lineObject, isSelected }) {
     context.stroke();
 
     // ************** draw arrow ********************
-    const a1 = (y2 - y) / (x2 - x);
-    const b1 = y1 - a1 * x1;
-    const a2 = -1 / a1;
-    const b2 = y2 - x2 * a2;
+    // const a1 = (y2 - y) / (x2 - x);
+    // const b1 = y1 - a1 * x1;
+    // const a2 = -1 / a1;
+    // const b2 = y2 - x2 * a2;
 
-    const startArrowX = -(b2 - b1) / (a2 - a1);
-    const startArrowY = a1 * startArrowX + b1;
-    canvasArrow(context, startArrowX, startArrowY, x2, y2, ARROW_RADIUS, isSelected);
+    // const startArrowX = -(b2 - b1) / (a2 - a1);
+    // const startArrowY = a1 * startArrowX + b1;
+    // canvasArrow(context, startArrowX, startArrowY, x2, y2, ARROW_RADIUS, isSelected);
     // ***********************************************
 
     // ************** draw weight ******************
@@ -202,6 +209,22 @@ export function drawArcLine({ context, lineObject, isSelected }) {
     // ***********************************************
 }
 
+function drawDirectionArcLine({ context, lineObject, isSelected }) {
+    let { x1, y1, x2, y2, properties } = lineObject;
+    const { x, y } = findTwoCenter(x1, y1, x2, y2)[x1 > x2 ? 0 : 1];
+
+    // ************** draw arrow ********************
+    const a1 = (y2 - y) / (x2 - x);
+    const b1 = y1 - a1 * x1;
+    const a2 = -1 / a1;
+    const b2 = y2 - x2 * a2;
+
+    const startArrowX = -(b2 - b1) / (a2 - a1);
+    const startArrowY = a1 * startArrowX + b1;
+    canvasArrow(context, startArrowX, startArrowY, x2, y2, ARROW_RADIUS, isSelected);
+    // ***********************************************
+}
+
 export function drawFunc(
     canvasElement,
     scale,
@@ -229,6 +252,22 @@ export function drawFunc(
             });
         else
             drawLine({
+                context,
+                lineObject: line,
+                isSelected:
+                    (line.id1 === selectedLine?.id1 && line.id2 === selectedLine?.id2) ||
+                    (line.id1 === selectedLine?.id2 && line.id2 === selectedLine?.id1),
+            });
+    }
+    for (const line of lineList) {
+        if (line.multiple)
+            drawDirectionArcLine({
+                context,
+                lineObject: line,
+                isSelected: line.id1 === selectedLine?.id1 && line.id2 === selectedLine?.id2,
+            });
+        else
+            drawDirectionLine({
                 context,
                 lineObject: line,
                 isSelected:

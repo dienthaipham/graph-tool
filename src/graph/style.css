@@ -1,8 +1,9 @@
 .mode-tabs {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 48px;
     list-style: none;
+    padding-left: 1160px;
 }
 
 .tab {
@@ -20,7 +21,7 @@
 }
 
 .selected {
-    text-decoration: underline;
+    /* text-decoration: underline; */
 }
 
 #wrapper {
