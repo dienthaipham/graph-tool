@@ -103,10 +103,6 @@ export function drawLine({ context, lineObject, isSelected }) {
 
     context.closePath();
 
-    // ************** draw arrow ******************
-    // canvasArrow(context, x1, y1, x2, y2, ARROW_RADIUS, isSelected);
-    // ***********************************************
-
     // ************** draw weight ******************
     const xI = (x1 + x2) / 2 + (isSelected ? 5 : 0);
     const yI = (y1 + y2) / 2;
@@ -168,17 +164,6 @@ export function drawArcLine({ context, lineObject, isSelected }) {
     context.lineWidth = 2;
     context.strokeStyle = isSelected ? LINE_COLOR_SELECTED : LINE_COLOR;
     context.stroke();
-
-    // ************** draw arrow ********************
-    // const a1 = (y2 - y) / (x2 - x);
-    // const b1 = y1 - a1 * x1;
-    // const a2 = -1 / a1;
-    // const b2 = y2 - x2 * a2;
-
-    // const startArrowX = -(b2 - b1) / (a2 - a1);
-    // const startArrowY = a1 * startArrowX + b1;
-    // canvasArrow(context, startArrowX, startArrowY, x2, y2, ARROW_RADIUS, isSelected);
-    // ***********************************************
 
     // ************** draw weight ******************
     const R_square = (x1 - x) ** 2 + (y1 - y) ** 2;

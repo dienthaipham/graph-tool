@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './styles.css';
 
-// Refactor: merge add w and add to 1 component
 function AddNodeForm(props) {
     const inputRef = useRef(null);
     const { onClose, onSubmit } = props;
@@ -10,13 +9,10 @@ function AddNodeForm(props) {
     useEffect(() => {
         const handleEnterInput = (e) => {
             if (e.key === 'Enter') {
-                // console.log({ name });
                 onSubmit(name);
                 onClose();
             }
         };
-        // console.log(inputRef.current);
-        // inputRef.current.focus();
         inputRef.current.addEventListener('keyup', handleEnterInput);
         return () => {
             inputRef.current?.removeEventListener('keyup', handleEnterInput);
@@ -43,7 +39,6 @@ function AddNodeForm(props) {
                         onClick={() => {
                             onSubmit(name);
                             onClose();
-                            // inputRef.current.focus();
                         }}>
                         Save
                     </button>

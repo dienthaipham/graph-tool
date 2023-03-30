@@ -54,8 +54,6 @@ function GraphTool(props) {
         setSelectedNode(null);
 
         if (o.value === 'UNDO') {
-            console.log('graphHistoryREf: ', graphHistoryRef.current);
-
             graphHistoryRef.current = graphHistoryRef.current.slice(0, -1);
 
             const countActions = graphHistoryRef.current.length;
@@ -246,7 +244,6 @@ function GraphTool(props) {
                 lineList,
             });
         } else if (actionData.line) {
-            console.log({ value });
             const { direction, weight } = value;
             const line = actionData.line;
 
@@ -314,7 +311,6 @@ function GraphTool(props) {
             setHoverNode(null);
 
             if (dndRef.current.mouseDown) {
-                // if (mode.value === 'ADD_NODE') return;
                 if (selectedNode) {
                     const keepNodes = nodeList.filter((node) => node.id !== selectedNode.id);
                     setNodeList([...keepNodes, { ...selectedNode, x: clickX0, y: clickY0 }]);
@@ -462,8 +458,6 @@ function GraphTool(props) {
                         } else setSelectedNode(null);
                     }
 
-                    // }
-
                     break;
                 case 3:
                     setActionData({
@@ -483,7 +477,6 @@ function GraphTool(props) {
 
         const handleMouseUp = (evt) => {
             dndRef.current.mouseDown = false;
-            console.log('MOUSE UP :::::::');
 
             const currentGraph = {
                 nodeList,
@@ -527,7 +520,6 @@ function GraphTool(props) {
 
     useEffect(() => {
         const handleResizeScreen = () => {
-            console.log('Resize :::::::::::::::::::::::::::::::::::::::::::');
             if (actionModalOpen) {
                 setActionModalOpen(false);
                 setActionData({ node: null, line: null });
