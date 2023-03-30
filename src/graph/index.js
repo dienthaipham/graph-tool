@@ -24,6 +24,7 @@ import {
 } from './utils';
 
 function GraphTool(props) {
+    const canvasWrapperRef = useRef(null);
     const canvasRef = useRef(null);
     const dndRef = useRef({
         mouseDown: false,
@@ -303,8 +304,10 @@ function GraphTool(props) {
         );
 
         const handleMouseMove = (evt) => {
-            const clickX = evt.pageX - canvasRef.current.offsetLeft;
-            const clickY = evt.pageY - canvasRef.current.offsetTop;
+            const clickX =
+                evt.pageX - canvasWrapperRef.current.offsetLeft - canvasRef.current.offsetLeft;
+            const clickY =
+                evt.pageY - canvasWrapperRef.current.offsetTop - canvasRef.current.offsetTop;
             const clickX0 = (clickX - dndRef.current.translatePos.x) / scale;
             const clickY0 = (clickY - dndRef.current.translatePos.y) / scale;
 
@@ -380,11 +383,13 @@ function GraphTool(props) {
                             targetNode?.y * scale +
                             dndRef.current.translatePos.y +
                             canvasRef.current.offsetTop +
+                            canvasWrapperRef.current.offsetTop +
                             20,
                         left:
                             targetNode?.x * scale +
                             dndRef.current.translatePos.x +
-                            canvasRef.current.offsetLeft,
+                            canvasRef.current.offsetLeft +
+                            canvasWrapperRef.current.offsetLeft,
                     });
                 }
                 // ********************************************
@@ -395,8 +400,10 @@ function GraphTool(props) {
 
         // ******************Add event listeners to handle screen drag****************
         const handleMouseDown = (evt) => {
-            const clickX = evt.pageX - canvasRef.current.offsetLeft;
-            const clickY = evt.pageY - canvasRef.current.offsetTop;
+            const clickX =
+                evt.pageX - canvasWrapperRef.current.offsetLeft - canvasRef.current.offsetLeft;
+            const clickY =
+                evt.pageY - canvasWrapperRef.current.offsetTop - canvasRef.current.offsetTop;
             const clickX0 = (clickX - dndRef.current.translatePos.x) / scale;
             const clickY0 = (clickY - dndRef.current.translatePos.y) / scale;
 
@@ -531,7 +538,7 @@ function GraphTool(props) {
     }, [actionModalOpen]);
 
     return (
-        <>
+        <div id='wrapper'>
             {hoverNode && <DetailTooltip node={hoverNode} position={hoverPosition} />}
             {formOpen.addNode && (
                 <AddNodeForm
@@ -576,7 +583,7 @@ function GraphTool(props) {
                     </li>
                 ))}
             </ul>
-            <div id='wrapper'>
+            <div id='canvas-wrapper' ref={canvasWrapperRef}>
                 <canvas id='myCanvas' width='720' height='720' ref={canvasRef}></canvas>
                 <div id='buttonWrapper'>
                     <input type='button' id='plus' value='+' onClick={() => handleZoom('OUT')} />
@@ -589,7 +596,7 @@ function GraphTool(props) {
                     />
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 

@@ -1,9 +1,10 @@
 .mode-tabs {
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
     gap: 48px;
     list-style: none;
-    padding-left: 1160px;
+    /* padding-left: 1160px; */
+    padding-left: 0;
 }
 
 .tab {
@@ -25,7 +26,13 @@
 }
 
 #wrapper {
-    /* position: relative; */
+    width: 720px;
+    height: 720px;
+    margin: 0 auto;
+}
+
+#canvas-wrapper {
+    position: relative;
     border: 1px solid #9c9898;
     width: 720px;
     height: 720px;
@@ -35,8 +42,8 @@
 #buttonWrapper {
     position: absolute;
     width: 30px;
-    top: 54px;
-    right: 597px;
+    top: 6px;
+    right: 36px;
 }
 
 input[type='button'] {
