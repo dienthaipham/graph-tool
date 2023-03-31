@@ -1,4 +1,6 @@
+import { NODE_RADIUS } from './constants';
 import { D_MAX, DELTA_R_MAX, K } from './constants';
+import { Node, Line } from './objects';
 
 export function getDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
@@ -202,4 +204,63 @@ export function unLinkTwoNodes(lineList, node1, node2) {
             !(line.id1 === node1.id && line.id2 === node2.id) &&
             !(line.id1 === node2.id && line.id2 === node1.id),
     );
+}
+
+function generateRandom(min, max) {
+    let difference = max - min;
+    let rand = Math.random();
+    rand = Math.floor(rand * difference);
+    rand = rand + min;
+
+    return rand;
+}
+
+export function genGraphObject(graphData) {
+    const positions = [];
+
+    const validPosition = (positionList, x, y) => {
+        for (const [x0, y0] of positionList) {
+            const d = Math.sqrt((x - x0) ** 2 + (y - y0) ** 2);
+            if (d < 5 * NODE_RADIUS) return false;
+        }
+        return true;
+    };
+
+    const genPosition = () => {
+        while (true) {
+            const x = generateRandom(NODE_RADIUS, 650 - NODE_RADIUS);
+            const y = generateRandom(NODE_RADIUS, 720 - NODE_RADIUS);
+            if (validPosition(positions, x, y)) {
+                positions.push([x, y]);
+                return { x, y };
+            }
+        }
+    };
+
+    // dict: node_name -> (id, x, y)
+    const nodeDict = {};
+    const nodeList = [];
+
+    for (const { name } of graphData.nodes) {
+        const { x, y } = genPosition();
+        const id = Math.round(Math.random() * 9999999);
+        nodeDict[name] = { id, x, y };
+        nodeList.push(
+            new Node(id, x, y, NODE_RADIUS, {
+                name,
+            }),
+        );
+    }
+
+    const lineList = graphData.links.map((link) => {
+        const node1 = nodeDict[link.source];
+        const node2 = nodeDict[link.target];
+
+        const lineCoordinate = getLineCoordinate(node1.x, node1.y, node2.x, node2.y, NODE_RADIUS);
+        return new Line(node1.id, node2.id, false, ...Object.values(lineCoordinate), {
+            w: link.cost,
+        });
+    });
+
+    return { nodes: nodeList, lines: lineList };
 }

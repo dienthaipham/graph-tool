@@ -270,3 +270,53 @@ export function getRandomNameNode() {
 export function getRandomWeight() {
     return Math.ceil(2 * Math.random());
 }
+
+export const graphData = {
+    'search_order_config': 'Main_network',
+    'nodes': [
+        {
+            'name': 'node1',
+        },
+        {
+            'name': 'node2',
+        },
+        {
+            'name': 'node3',
+        },
+        {
+            'name': 'node4',
+        },
+    ],
+    'links': [
+        {
+            'source': 'node1',
+            'target': 'node2',
+            'cost': 1,
+        },
+        {
+            'source': 'node2',
+            'target': 'node1',
+            'cost': 1,
+        },
+        {
+            'source': 'node1',
+            'target': 'node3',
+            'cost': 4,
+        },
+        {
+            'source': 'node3',
+            'target': 'node2',
+            'cost': 3,
+        },
+        {
+            'source': 'node2',
+            'target': 'node4',
+            'cost': 4,
+        },
+        {
+            'source': 'node4',
+            'target': 'node2',
+            'cost': 4,
+        },
+    ],
+};

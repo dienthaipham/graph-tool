@@ -12,6 +12,7 @@ import {
     checkExistEdge,
     checkExistLink,
     compareTwoGraphHistory,
+    genGraphObject,
     getDistance,
     getIndexOfLine,
     getIndexOfNode,
@@ -22,6 +23,7 @@ import {
     randomNodeId,
     unLinkTwoNodes,
 } from './utils';
+import { graphData } from './mockData';
 
 function GraphTool(props) {
     const canvasWrapperRef = useRef(null);
@@ -536,6 +538,12 @@ function GraphTool(props) {
 
         return () => window.removeEventListener('resize', handleResizeScreen);
     }, [actionModalOpen]);
+
+    useEffect(() => {
+        const { nodes, lines } = genGraphObject(graphData);
+        setNodeList(nodes);
+        setLineList(lines);
+    }, []);
 
     return (
         <div id='wrapper'>
