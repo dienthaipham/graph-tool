@@ -5,6 +5,7 @@ const MODES = [
     // { value: 'REMOVE_OBJECT', label: 'Remove object' },
     { value: 'UNDO', label: 'Undo' },
     { value: 'CLEAR', label: 'Clear' },
+    { value: 'EXTRACT', label: 'Extract' },
 ];
 
 // ************** Node style ************************************

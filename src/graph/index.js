@@ -69,7 +69,13 @@ function GraphTool(props) {
             setLineList([]);
             graphHistoryRef.current.push({ nodeList: [], lineList: [] });
             return;
+        } else if (o.value === 'EXTRACT') {
+            console.log(nodeList);
+            const extractedData = nodeList.map((n) => ({ x: n.x, y: n.y }));
+            console.log(extractedData);
+            return;
         }
+
         setMode(o);
     };
 
@@ -112,7 +118,28 @@ function GraphTool(props) {
             name,
         });
         const newNodeList = [...nodeList, addNode];
+
+        // Add lines
+        let newLineList = [...lineList];
+        for (const node of nodeList) {
+            const lineCoordinate = getLineCoordinate(
+                addNode.x,
+                addNode.y,
+                node.x,
+                node.y,
+                NODE_RADIUS,
+            );
+
+            newLineList = [
+                ...newLineList,
+                new Line(addNode.id, node.id, false, ...Object.values(lineCoordinate), {
+                    w: 1,
+                }),
+            ];
+        }
+
         setNodeList(newNodeList);
+        setLineList(newLineList);
         graphHistoryRef.current.push({
             nodeList: newNodeList,
             lineList,
@@ -377,23 +404,23 @@ function GraphTool(props) {
                 );
             } else {
                 // ********** Hover node ****************
-                const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
-                if (!actionModalOpen) {
-                    setHoverNode(targetNode);
-                    setHoverPosition({
-                        top:
-                            targetNode?.y * scale +
-                            dndRef.current.translatePos.y +
-                            canvasRef.current.offsetTop +
-                            canvasWrapperRef.current.offsetTop +
-                            20,
-                        left:
-                            targetNode?.x * scale +
-                            dndRef.current.translatePos.x +
-                            canvasRef.current.offsetLeft +
-                            canvasWrapperRef.current.offsetLeft,
-                    });
-                }
+                // const targetNode = getNodeByClick(nodeList, clickX0, clickY0);
+                // if (!actionModalOpen) {
+                //     setHoverNode(targetNode);
+                //     setHoverPosition({
+                //         top:
+                //             targetNode?.y * scale +
+                //             dndRef.current.translatePos.y +
+                //             canvasRef.current.offsetTop +
+                //             canvasWrapperRef.current.offsetTop +
+                //             20,
+                //         left:
+                //             targetNode?.x * scale +
+                //             dndRef.current.translatePos.x +
+                //             canvasRef.current.offsetLeft +
+                //             canvasWrapperRef.current.offsetLeft,
+                //     });
+                // }
                 // ********************************************
             }
         };
@@ -438,34 +465,36 @@ function GraphTool(props) {
                     setSelectedLine(targetLine);
 
                     if (!selectedNode) setSelectedNode(targetNode);
-                    else {
-                        if (targetNode) {
-                            // Check when clicking on the same node
-                            const distanceToCenter = getDistance(
-                                selectedNode.x,
-                                selectedNode.y,
-                                clickX0,
-                                clickY0,
-                            );
-                            if (distanceToCenter < selectedNode.radius) return;
+                    setSelectedNode(targetNode);
 
-                            // CHeck same link -> return
-                            if (
-                                checkExistLink(lineList, selectedNode.id, targetNode.id) ||
-                                checkExistEdge(lineList, selectedNode.id, targetNode.id)
-                            ) {
-                                setSelectedNode(targetNode);
-                                return;
-                            }
+                    // else {
+                    //     if (targetNode) {
+                    //         // Check when clicking on the same node
+                    //         const distanceToCenter = getDistance(
+                    //             selectedNode.x,
+                    //             selectedNode.y,
+                    //             clickX0,
+                    //             clickY0,
+                    //         );
+                    //         if (distanceToCenter < selectedNode.radius) return;
 
-                            setFormOpen({ ...formOpen, addWeight: true });
-                            setFormMetaData({
-                                ...formMetaData,
-                                addWeight: { selectedNode, targetNode },
-                            });
-                            setHoverNode(false);
-                        } else setSelectedNode(null);
-                    }
+                    //         // CHeck same link -> return
+                    //         if (
+                    //             checkExistLink(lineList, selectedNode.id, targetNode.id) ||
+                    //             checkExistEdge(lineList, selectedNode.id, targetNode.id)
+                    //         ) {
+                    //             setSelectedNode(targetNode);
+                    //             return;
+                    //         }
+
+                    //         setFormOpen({ ...formOpen, addWeight: true });
+                    //         setFormMetaData({
+                    //             ...formMetaData,
+                    //             addWeight: { selectedNode, targetNode },
+                    //         });
+                    //         setHoverNode(false);
+                    //     } else setSelectedNode(null);
+                    // }
 
                     break;
                 case 3:
@@ -539,11 +568,11 @@ function GraphTool(props) {
         return () => window.removeEventListener('resize', handleResizeScreen);
     }, [actionModalOpen]);
 
-    useEffect(() => {
-        const { nodes, lines } = genGraphObject(graphData);
-        setNodeList(nodes);
-        setLineList(lines);
-    }, []);
+    // useEffect(() => {
+    //     const { nodes, lines } = genGraphObject(graphData);
+    //     setNodeList(nodes);
+    //     setLineList(lines);
+    // }, []);
 
     return (
         <div id='wrapper'>
